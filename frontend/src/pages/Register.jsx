@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { registerNewUser } from "../redux/actions/userAction";
+import { registerNewUser } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Oauth from "../components/Oauth";

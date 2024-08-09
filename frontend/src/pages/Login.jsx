@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../redux/actions/userAction";
+import { loginUser } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Oauth from "../components/Oauth";
@@ -70,6 +70,11 @@ const Login = () => {
           >
             Login
           </button>
+          <p>
+            <Link to="/forgot/password" className="text-blue-600">
+              Forgot Password?
+            </Link>
+          </p>
           <p>
             New user?
             <Link to="/register" className="text-blue-600">

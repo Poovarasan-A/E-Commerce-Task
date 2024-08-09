@@ -50,6 +50,68 @@ const userSlice = createSlice({
         error: action.payload,
       };
     },
+    forgotPasswordRequest(state) {
+      return {
+        ...state,
+        loading: true,
+        message: null,
+      };
+    },
+    forgotPasswordSuccess(state, action) {
+      return {
+        ...state,
+        loading: false,
+        message: action.payload.message,
+      };
+    },
+    forgotPasswordFail(state, action) {
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+    },
+    resetPasswordRequest(state) {
+      return {
+        ...state,
+        loading: true,
+      };
+    },
+    resetPasswordSuccess(state, action) {
+      return {
+        ...state,
+        isAuthenticated: true,
+        user: action.payload.user,
+      };
+    },
+    resetPasswordFail(state, action) {
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+    },
+    //Google User
+    googleUserReq(state) {
+      return {
+        ...state,
+        loading: true,
+      };
+    },
+    googleUserSuccess(state, action) {
+      return {
+        loading: false,
+        isAuthenticated: true,
+        user: action.payload.user,
+      };
+    },
+    googleUserFail(state, action) {
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+    },
   },
 });
 
@@ -62,6 +124,15 @@ export const {
   loginReq,
   loginSuccess,
   loginFail,
+  forgotPasswordFail,
+  forgotPasswordRequest,
+  forgotPasswordSuccess,
+  resetPasswordFail,
+  resetPasswordRequest,
+  resetPasswordSuccess,
+  googleUserFail,
+  googleUserReq,
+  googleUserSuccess,
 } = actions;
 
 export default reducer;

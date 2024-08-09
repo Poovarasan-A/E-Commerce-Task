@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { lazy, Suspense } from "react";
 import Loader from "./components/Loader";
+import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
 const Register = lazy(() => import("./pages/Register"));
 const Login = lazy(() => import("./pages/Login"));
 
@@ -17,6 +19,11 @@ const App = () => {
             <Routes>
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/forgot/password" element={<ForgotPassword />} />
+              <Route
+                path="/reset/password/:token"
+                element={<ResetPassword />}
+              />
             </Routes>
           </Suspense>
         </Router>

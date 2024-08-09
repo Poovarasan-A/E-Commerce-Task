@@ -65,3 +65,97 @@ export const loginUser = async (req, res, next) => {
     return res.status(401).json({ message: error.message });
   }
 };
+
+//------------------------ google Login ------------------------------------------
+
+export const googleLogin = async (req, res, next) => {
+  const { name, email, images } = req.body;
+  const generatePassword =
+    Math.random().toString(36).slice(-4) + Math.random().toString(36).slice(-4);
+
+  console.log(generatePassword);
+
+  try {
+    const user = await Auth.create({
+      name,
+      email,
+      password: generatePassword,
+      images: images.map((image) => ({
+        url: image.url,
+        filename: image.filename,
+      })),
+    });
+    sendToken(user, 201, res);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+//------------------------ forgot password ----------------------
+
+export const forgotPassword = async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user) {
+    return res.status(404).json({ message: "User email not found" });
+  }
+
+  const resetToken = user.getResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  let BASE_URL = process.env.FRONTEND_URL;
+  if (process.env.NODE_ENV === "production") {
+    BASE_URL = `${req.protocol}://${req.get("host")}`;
+  }
+  const resetUrl = `${BASE_URL}/password/reset/${resetToken}`;
+
+  const message = `Your password reset link as follows \n\n ${resetUrl} \n\n If you have not requested this, then ignore this email`;
+
+  try {
+    sendEmail({
+      email: user.email,
+      subject: "E com password recovery",
+      message,
+    });
+    res
+      .status(200)
+      .json({ message: `Email sent to ${user.email} successfully` });
+  } catch (error) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordTokenExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+    return res.status(500).json({ message: error });
+  }
+};
+
+//------------------------ reset password ----------------------
+
+export const resetPassword = async (req, res, next) => {
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordTokenExpire: {
+      $gt: Date.now(),
+    },
+  });
+
+  if (!user) {
+    res
+      .status(401)
+      .json({ message: "Password reset token is invalid or expired" });
+  }
+
+  if (req.body.password !== req.body.confirmPassword) {
+    res.status(401).json({ message: "Password does not match " });
+  }
+
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordTokenExpire = undefined;
+  await user.save({ validateBeforeSave: false });
+  sendToken(user, 201, res);
+};
