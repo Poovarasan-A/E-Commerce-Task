@@ -50,6 +50,12 @@ const userSlice = createSlice({
         error: action.payload,
       };
     },
+    clearLoginErr(state) {
+      return {
+        ...state,
+        error: null,
+      };
+    },
     forgotPasswordRequest(state) {
       return {
         ...state,
@@ -124,6 +130,7 @@ export const {
   loginReq,
   loginSuccess,
   loginFail,
+  clearLoginErr,
   forgotPasswordFail,
   forgotPasswordRequest,
   forgotPasswordSuccess,

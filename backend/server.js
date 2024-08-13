@@ -6,25 +6,26 @@ import { fileURLToPath } from "url";
 import user from "./routes/userRoute.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import bodyParser from "body-parser";
 
-const _filename = fileURLToPath(import.meta.url);
-const _dirname = path.dirname(_filename);
+const _dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
-dotenv.config({ path: path.join(_dirname, "config/.env") });
+dotenv.config({ path: path.join(_dirname, ".env") });
 
 //Cors
-
+app.use(bodyParser.urlencoded({ extended: true }));
 const corsOptions = {
   origin: "http://localhost:5173",
   optionsSuccessStatus: 200,
+  credentials: true,
 };
 app.use(cors(corsOptions));
 
 app.use(cookieParser());
 app.use(express.json());
-app.use("/ecom/", user);
+app.use("/api/ecom/", user);
 
 connectDB();
 

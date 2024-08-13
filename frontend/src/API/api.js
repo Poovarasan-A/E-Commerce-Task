@@ -14,64 +14,62 @@ import {
   resetPasswordFail,
   resetPasswordRequest,
   resetPasswordSuccess,
-} from "./redux/slices/userSlice";
+} from "../redux/slices/userSlice";
 import axios from "axios";
 
-//---------------------- Register Action -------------------------------
+const BASE_URL = "http://localhost:8000/api/ecom/";
+
+const privateApi = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+//01
+//User Register
 
 export const registerNewUser = (formData) => async (dispatch) => {
   try {
     dispatch(registerReq());
-
-    const { data } = await axios.post(
-      `http://localhost:8000/ecom/register/user`,
-      formData
-    );
+    const { data } = await privateApi.post(`/register/user`, formData, {
+      withCredentials: true,
+    });
     dispatch(registerSuccess(data));
   } catch (error) {
     dispatch(registerFail(error.response.data.message));
   }
 };
 
-//---------------------- Login Action -------------------------------
+//02
+//User Login
 
 export const loginUser = (formData) => async (dispatch) => {
   try {
     dispatch(loginReq());
-    const { data } = await axios.post(
-      `http://localhost:8000/ecom/login/user`,
-      formData
-    );
+    const { data } = await privateApi.post(`/login/user`, formData);
     dispatch(loginSuccess(data));
   } catch (error) {
     dispatch(loginFail(error.response.data.message));
   }
 };
 
-//---------------------------google User-----------------------
-
+//03
+//Google User
 export const googleNewUser = (formData) => async (dispatch) => {
   try {
     dispatch(googleUserReq());
-
-    const { data } = await axios.post(
-      `http://localhost:8000/ecom/google`,
-      formData
-    );
+    const { data } = await privateApi.post(`/google`, formData);
     const token = data.token;
     document.cookie = `token=${token}`;
     dispatch(googleUserSuccess(data));
   } catch (error) {
-    let errorMessage = error.message;
-    if (error.response && error.response.data) {
-      errorMessage = error.response.data.message;
-    }
-    dispatch(googleUserFail(errorMessage));
+    dispatch(googleUserFail(error.response.data.message));
   }
 };
 
-//----------------------------forgot password----------------------
-
+//04
+//Forgot password
 export const forgotPassword = (formData) => async (dispatch) => {
   try {
     dispatch(forgotPasswordRequest());
@@ -81,8 +79,8 @@ export const forgotPassword = (formData) => async (dispatch) => {
       },
     };
 
-    const { data } = await axios.post(
-      `http://localhost:8000/ecom/forgot/password`,
+    const { data } = await privateApi.post(
+      `/forgot/password`,
       formData,
       config
     );
@@ -92,6 +90,8 @@ export const forgotPassword = (formData) => async (dispatch) => {
   }
 };
 
+//05
+//Password Reset
 export const passwordReset = (formData, token) => async (dispatch) => {
   try {
     dispatch(resetPasswordRequest());
@@ -101,8 +101,8 @@ export const passwordReset = (formData, token) => async (dispatch) => {
       },
     };
 
-    const { data } = await axios.post(
-      `http://localhost:8000/ecom/password/reset/${token}`,
+    const { data } = await privateApi.post(
+      `/password/reset/${token}`,
       formData,
       config
     );

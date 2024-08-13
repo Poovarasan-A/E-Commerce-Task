@@ -1,17 +1,11 @@
 import { FcGoogle } from "react-icons/fc";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { app } from "../firebase";
-import { googleNewUser } from "../api";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { googleNewUser } from "../API/api";
+import { useDispatch } from "react-redux";
 
 const Oauth = () => {
-  const { isAuthenticated, error } = useSelector((state) => state.userState);
-
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const auth = getAuth(app);
 
   const handleGoogleAuth = async () => {
@@ -37,20 +31,6 @@ const Oauth = () => {
       console.error(error);
     }
   };
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      toast.success(`Welcome ${name}!`, {
-        position: "top-center",
-      });
-      navigate("/");
-    }
-    if (error) {
-      toast.error(error, {
-        position: "top-center",
-      });
-    }
-  }, [isAuthenticated, error, navigate]);
 
   return (
     <div className="w-full">

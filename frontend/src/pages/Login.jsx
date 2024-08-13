@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Oauth from "../components/Oauth";
+import { loginUser } from "../API/api";
+import { clearLoginErr } from "../redux/slices/userSlice";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -12,7 +13,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { user, error, isAuthenticated } = useSelector(
+  const { loading, user, error, isAuthenticated } = useSelector(
     (state) => state.userState
   );
 
@@ -28,12 +29,14 @@ const Login = () => {
   useEffect(() => {
     if (isAuthenticated) {
       toast.success(`welcome ${user.name}! `);
+      navigate("/");
       return;
     }
     if (error) {
       toast.error(error);
+      dispatch(clearLoginErr());
     }
-  }, [isAuthenticated, navigate, error, user]);
+  }, [isAuthenticated, error, user, navigate, dispatch]);
 
   return (
     <section className="fullscreen flex items-center justify-center bg-neutral-100/80">
@@ -66,7 +69,10 @@ const Login = () => {
           </div>
           <button
             type="submit"
-            className="px-2 py-3 bg-violet-500 rounded-3xl text-white mt-4 hover:bg-violet-600"
+            disabled={loading}
+            className={`px-2 py-3 ${
+              loading ? "bg-neutral-200" : "bg-violet-500"
+            } rounded-3xl text-white mt-4 hover:bg-violet-600`}
           >
             Login
           </button>

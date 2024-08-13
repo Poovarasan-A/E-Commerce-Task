@@ -1,23 +1,42 @@
 import bcrypt from "bcryptjs";
 import { User } from "../models/userSchema.js";
-import sendToken from "../utils/tokenResponse.js";
+import crypto from "crypto";
+import { sendEmail } from "../config/email.js";
+
+//token
+const sendToken = (user, statusCode, res) => {
+  const token = user.getJwtToken();
+
+  const options = {
+    expires: new Date(
+      Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  return res.status(statusCode).cookie("token", token, options).json({
+    success: true,
+    user,
+    token,
+  });
+};
 
 //------------------------ New User Registration -----------------
 
-export const registerUser = async (req, res, next) => {
+export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     let isEmail = /^[a-z]+@[a-z]+\.[a-z]+$/;
 
     if (!isEmail.test(email)) {
-      res.staus(400).json({ message: "Please enter valid email" });
+      return res.status(400).json({ message: "Please enter valid email" });
     }
 
     let isPassword = /^.{8,}$/;
 
     if (!isPassword.test(password)) {
-      res
+      return res
         .status(400)
         .json({ message: "Password characters should be atleast 8" });
     }
@@ -38,7 +57,7 @@ export const registerUser = async (req, res, next) => {
 
 //------------------------ Login User ----------------------
 
-export const loginUser = async (req, res, next) => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -68,32 +87,30 @@ export const loginUser = async (req, res, next) => {
 
 //------------------------ google Login ------------------------------------------
 
-export const googleLogin = async (req, res, next) => {
+export const googleLogin = async (req, res) => {
   const { name, email, images } = req.body;
-  const generatePassword =
-    Math.random().toString(36).slice(-4) + Math.random().toString(36).slice(-4);
-
-  console.log(generatePassword);
 
   try {
-    const user = await Auth.create({
+    let user = await User.findOne({ email });
+
+    if (user) {
+      return sendToken(user, 200, res);
+    }
+
+    user = await User.create({
       name,
       email,
-      password: generatePassword,
-      images: images.map((image) => ({
-        url: image.url,
-        filename: image.filename,
-      })),
     });
+
     sendToken(user, 201, res);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
 //------------------------ forgot password ----------------------
 
-export const forgotPassword = async (req, res, next) => {
+export const forgotPassword = async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
@@ -103,13 +120,11 @@ export const forgotPassword = async (req, res, next) => {
   const resetToken = user.getResetToken();
   await user.save({ validateBeforeSave: false });
 
-  let BASE_URL = process.env.FRONTEND_URL;
-  if (process.env.NODE_ENV === "production") {
-    BASE_URL = `${req.protocol}://${req.get("host")}`;
-  }
-  const resetUrl = `${BASE_URL}/password/reset/${resetToken}`;
+  const resetUrl = `http://localhost:5173/reset/password/${resetToken}`;
 
   const message = `Your password reset link as follows \n\n ${resetUrl} \n\n If you have not requested this, then ignore this email`;
+
+  console.log(message);
 
   try {
     sendEmail({
@@ -117,7 +132,7 @@ export const forgotPassword = async (req, res, next) => {
       subject: "E com password recovery",
       message,
     });
-    res
+    return res
       .status(200)
       .json({ message: `Email sent to ${user.email} successfully` });
   } catch (error) {
@@ -136,6 +151,9 @@ export const resetPassword = async (req, res, next) => {
     .update(req.params.token)
     .digest("hex");
 
+  console.log("Received token:", req.params.token);
+  console.log("Hashed token:", resetPasswordToken);
+
   const user = await User.findOne({
     resetPasswordToken,
     resetPasswordTokenExpire: {
@@ -144,13 +162,13 @@ export const resetPassword = async (req, res, next) => {
   });
 
   if (!user) {
-    res
+    return res
       .status(401)
       .json({ message: "Password reset token is invalid or expired" });
   }
 
-  if (req.body.password !== req.body.confirmPassword) {
-    res.status(401).json({ message: "Password does not match " });
+  if (req.body.newPassword !== req.body.confirmPassword) {
+    return res.status(401).json({ message: "Password does not match " });
   }
 
   user.password = req.body.password;

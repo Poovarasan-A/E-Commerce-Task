@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { forgotPassword } from "../api";
+import { forgotPassword } from "../API/api";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -31,6 +31,7 @@ const ForgotPassword = () => {
       return;
     }
   }, [message, error]);
+
   return (
     <Fragment>
       <section className="fullscreen flex items-center justify-center bg-neutral-100/80">

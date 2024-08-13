@@ -9,10 +9,10 @@ import {
 
 const router = express.Router();
 
-router.route("/register/user").post(registerUser);
-router.route("/login/user").post(loginUser);
-router.route("/google").post(googleLogin);
-router.route("/forgot/password").post(forgotPassword);
-router.route("/reset/password/:token").post(resetPassword);
+router.post("/register/user", registerUser);
+router.post("/login/user", loginUser);
+router.post("/google", googleLogin);
+router.post("/forgot/password", forgotPassword);
+router.post("/reset/password/:token", resetPassword);
 
 export default router;
