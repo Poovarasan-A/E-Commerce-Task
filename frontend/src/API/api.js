@@ -35,6 +35,8 @@ export const registerNewUser = (formData) => async (dispatch) => {
     const { data } = await privateApi.post(`/register/user`, formData, {
       withCredentials: true,
     });
+    const token = data.token;
+    document.cookie = `token=${token}`;
     dispatch(registerSuccess(data));
   } catch (error) {
     dispatch(registerFail(error.response.data.message));
@@ -47,7 +49,11 @@ export const registerNewUser = (formData) => async (dispatch) => {
 export const loginUser = (formData) => async (dispatch) => {
   try {
     dispatch(loginReq());
-    const { data } = await privateApi.post(`/login/user`, formData);
+    const { data } = await privateApi.post(`/login/user`, formData, {
+      withCredentials: true,
+    });
+    const token = data.token;
+    document.cookie = `token=${token}`;
     dispatch(loginSuccess(data));
   } catch (error) {
     dispatch(loginFail(error.response.data.message));
@@ -102,7 +108,7 @@ export const passwordReset = (formData, token) => async (dispatch) => {
     };
 
     const { data } = await privateApi.post(
-      `/password/reset/${token}`,
+      `/reset/password/${token}`,
       formData,
       config
     );

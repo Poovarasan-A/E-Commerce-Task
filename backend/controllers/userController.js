@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { User } from "../models/userSchema.js";
 import crypto from "crypto";
 import { sendEmail } from "../config/email.js";
+import { jwtDecode } from "jwt-decode";
 
 //token
 const sendToken = (user, statusCode, res) => {
@@ -14,7 +15,7 @@ const sendToken = (user, statusCode, res) => {
     httpOnly: true,
   };
 
-  return res.status(statusCode).cookie("token", token, options).json({
+  res.status(statusCode).cookie("token", token, options).json({
     success: true,
     user,
     token,
@@ -88,7 +89,7 @@ export const loginUser = async (req, res) => {
 //------------------------ google Login ------------------------------------------
 
 export const googleLogin = async (req, res) => {
-  const { name, email, images } = req.body;
+  const { name, email } = req.body;
 
   try {
     let user = await User.findOne({ email });
@@ -145,14 +146,12 @@ export const forgotPassword = async (req, res) => {
 
 //------------------------ reset password ----------------------
 
-export const resetPassword = async (req, res, next) => {
+export const resetPassword = async (req, res) => {
+  const { newPassword, confirmPassword } = req.body;
   const resetPasswordToken = crypto
     .createHash("sha256")
     .update(req.params.token)
     .digest("hex");
-
-  console.log("Received token:", req.params.token);
-  console.log("Hashed token:", resetPasswordToken);
 
   const user = await User.findOne({
     resetPasswordToken,
@@ -167,11 +166,14 @@ export const resetPassword = async (req, res, next) => {
       .json({ message: "Password reset token is invalid or expired" });
   }
 
-  if (req.body.newPassword !== req.body.confirmPassword) {
+  if (newPassword !== confirmPassword) {
     return res.status(401).json({ message: "Password does not match " });
   }
 
-  user.password = req.body.password;
+  const salt = await bcrypt.genSalt(12);
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+  user.password = hashedPassword;
   user.resetPasswordToken = undefined;
   user.resetPasswordTokenExpire = undefined;
   await user.save({ validateBeforeSave: false });

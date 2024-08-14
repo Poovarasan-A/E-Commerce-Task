@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { passwordReset } from "../API/api";
 
 const ResetPassword = () => {
@@ -9,6 +9,7 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const { isAuthenticated, error } = useSelector((state) => state.userState);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { token } = useParams();
 
@@ -24,13 +25,14 @@ const ResetPassword = () => {
   useEffect(() => {
     if (isAuthenticated) {
       toast.success("Password reset successfully");
+      navigate("/login");
       return;
     }
     if (error) {
       toast.error(error);
       return;
     }
-  }, [isAuthenticated, error]);
+  }, [isAuthenticated, error, navigate]);
   return (
     <Fragment>
       <section className="fullscreen flex items-center justify-center bg-neutral-100/80">
