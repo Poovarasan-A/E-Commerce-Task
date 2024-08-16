@@ -6,7 +6,7 @@ import Search from "./Search";
 
 const Header = () => {
   return (
-    <div className="sticky top-0 w-full h-[4rem] border-b-2 px-20 flex items-center justify-between bg-white shadow-sm">
+    <nav className="sticky top-0 w-full h-[4rem] border-b-2 px-20 flex items-center justify-between bg-white shadow-sm">
       <h2 className=" font-extrabold text-2xl">
         <span className="text-violet-600">Y</span>kart
       </h2>
@@ -30,7 +30,7 @@ const Header = () => {
           Login
         </Link>
       </div>
-    </div>
+    </nav>
   );
 };
 export default Header;

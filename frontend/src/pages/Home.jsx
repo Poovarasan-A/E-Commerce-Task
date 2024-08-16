@@ -9,10 +9,8 @@ const Home = () => {
     <div className="flex flex-col items-center w-full min-h-full bg-slate-200/90">
       <Hero />
       <Category />
-      <div className="w-full h-full px-20">
-        <FeaturedProducts />
-        <RecentProducts />
-      </div>
+      <FeaturedProducts />
+      <RecentProducts />
       <Footer />
     </div>
   );

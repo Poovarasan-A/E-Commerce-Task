@@ -1,6 +1,6 @@
 import { IoClose } from "react-icons/io5";
 
-const Model = () => {
+const Modal = () => {
   return (
     <div className="fixed inset-0 bg-white bg-opacity-10 backdrop-blur-sm">
       <div>
@@ -9,4 +9,4 @@ const Model = () => {
     </div>
   );
 };
-export default Model;
+export default Modal;
